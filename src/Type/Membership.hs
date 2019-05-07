@@ -21,6 +21,7 @@ module Type.Membership
   , testMembership
   , compareMembership
   , impossibleMembership
+  , reifyMembership
   , Member
   -- * Association
   , Assoc(..)
@@ -38,9 +39,12 @@ module Type.Membership
   , Generate(..)
   , Forall(..)
   , ForallF
+  -- * Reexports
+  , Proxy(..)
   ) where
 
 import Data.Constraint
+import Data.Proxy
 import Data.String
 import GHC.TypeLits
 import Type.Membership.Internal

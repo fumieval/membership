@@ -25,6 +25,7 @@ module Type.Membership.Internal (
   , testMembership
   , compareMembership
   , impossibleMembership
+  , reifyMembership
   -- * Member class
   , Member(..)
   , type (∈)
@@ -144,6 +145,10 @@ leadership = Membership 0
 nextMembership :: Membership xs y -> Membership (x ': xs) y
 nextMembership (Membership n) = Membership (n + 1)
 {-# INLINE nextMembership #-}
+
+-- | Make up a 'Membership' from an integer.
+reifyMembership :: Int -> (forall x. Membership xs x -> r) -> r
+reifyMembership n k = k (Membership n)
 
 -- | Unicode flipped alias for 'Member'
 type x ∈ xs = Member xs x

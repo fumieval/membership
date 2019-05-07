@@ -1,8 +1,10 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 module Type.Membership.HList (HList(..)
+  , hindex
   , hfoldrWithIndex
   , htraverse
   , htraverseWithIndex
