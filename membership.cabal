@@ -24,7 +24,7 @@ library
     Type.Membership.HList
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.9.0.0
+  build-depends:       base >=4.9.0.0 && <5
     , deepseq
     , constraints
     , hashable
