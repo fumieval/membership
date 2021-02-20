@@ -4,7 +4,7 @@ cabal-version:       2.2
 -- http://haskell.org/cabal/users-guide/
 
 name:                membership
-version:             0
+version:             0.0.1
 synopsis:            Indices for type level lists
 description:         See README
 homepage:            https://github.com/fumieval/membership
