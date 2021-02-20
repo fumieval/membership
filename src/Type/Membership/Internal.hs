@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
@@ -51,11 +52,15 @@ import Data.Type.Equality
 import Data.Proxy
 import Control.Monad
 import Unsafe.Coerce
+import qualified Data.Kind as K
 import Data.Hashable
 import Data.Text.Prettyprint.Doc
 import Data.Typeable
 import Language.Haskell.TH hiding (Pred)
 import Language.Haskell.TH.Lift
+#if MIN_VERSION_template_haskell(2,17,0)
+import Language.Haskell.TH.Syntax
+#endif
 import Data.Semigroup (Semigroup(..))
 import GHC.TypeLits
 
@@ -80,19 +85,29 @@ instance Semigroup (Membership xs x) where
   x <> _ = x
 
 -- | Generates a 'Membership' that corresponds to the given ordinal (0-origin).
+#if MIN_VERSION_template_haskell(2,17,0)
+mkMembership :: Quote m => Int -> m Exp
+#else
 mkMembership :: Int -> Q Exp
+#endif
 mkMembership n = do
   let names = map mkName $ take (n + 1) $ concatMap (flip replicateM ['a'..'z']) [1..]
   let rest = mkName "any"
   let cons x xs = PromotedConsT `AppT` x `AppT` xs
   let t = foldr cons (VarT rest) (map VarT names)
   sigE (conE 'Membership `appE` litE (IntegerL $ toInteger n))
+#if MIN_VERSION_template_haskell(2,17,0)
+    $ forallT (PlainTV rest SpecifiedSpec : map (PlainTV `flip` SpecifiedSpec) names) (pure [])
+#else
     $ forallT (PlainTV rest : map PlainTV names) (pure [])
+#endif
     $ conT ''Membership `appT` pure t `appT` varT (names !! n)
 
 instance Lift (Membership xs x) where
   lift (Membership i) = mkMembership i
-
+#if MIN_VERSION_template_haskell(2,17,0)
+  liftTyped (Membership i) = Code $ TExp <$> mkMembership i
+#endif
 -- | @x@ is a member of @xs@
 class Member xs x where
   membership :: Membership xs x
@@ -179,7 +194,7 @@ class Lookup xs k v | k xs -> v where
 instance (Elaborate k (FindAssoc 0 k xs) ~ 'Expecting (n ':> v), KnownNat n) => Lookup xs k v where
   association = Membership (fromInteger $ natVal (Proxy :: Proxy n))
 
-data HList (h :: k -> *) (xs :: [k]) where
+data HList (h :: k -> K.Type) (xs :: [k]) where
   HNil :: HList h '[]
   HCons :: h x -> HList h xs -> HList h (x ': xs)
 
